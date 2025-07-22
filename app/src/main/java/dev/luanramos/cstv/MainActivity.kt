@@ -1,47 +1,66 @@
 package dev.luanramos.cstv
 
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.core.splashscreen.SplashScreen
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.lifecycle.lifecycleScope
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import dagger.hilt.android.AndroidEntryPoint
 import dev.luanramos.cstv.ui.theme.CSTVTheme
+import dev.luanramos.cstv.ui.view.MatchesScreen
+import dev.luanramos.cstv.ui.view.SplashScreen
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
+
+        val splashScreen = installSplashScreen()
+        handleSplashScreen(splashScreen, 2000)
+
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
         setContent {
             CSTVTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
+                val navController = rememberNavController()
+
+                NavHost(
+                    navController = navController,
+                    startDestination = "splash"
+                ) {
+                    composable("splash") {
+                        SplashScreen(
+                            onFinish = {
+                                navController.navigate("home"){
+                                    popUpTo("splash") { inclusive = true }
+                                }
+                            }
+                        )
+                    }
+                    composable("home") { MatchesScreen() }
                 }
             }
         }
     }
-}
 
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
+    fun ComponentActivity.handleSplashScreen(splashScreen: SplashScreen, duration: Long) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            var keepSplash = true
 
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    CSTVTheme {
-        Greeting("Android")
+            splashScreen.setKeepOnScreenCondition { keepSplash }
+            lifecycleScope.launch {
+                delay(duration)
+                keepSplash = false
+            }
+        }
     }
 }

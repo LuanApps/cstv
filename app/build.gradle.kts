@@ -91,8 +91,11 @@ dependencies {
     implementation(libs.okhttp.logging)
 
     /** DI */
-    ksp(libs.hiltCompiler)
-    kspTest(libs.hiltCompiler)
-    implementation(libs.hiltAndroid)
-    implementation(libs.hiltNavigationCompose)
+    ksp(libs.hilt.compiler)
+    kspTest(libs.hilt.compiler)
+    implementation(libs.hilt.android)
+    implementation(libs.hilt.navigation.compose)
+
+    /** Splash */
+    implementation(libs.androidx.core.splash)
 }
