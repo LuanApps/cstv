@@ -12,16 +12,25 @@ class MatchRepositoryImpl @Inject constructor(
 
     override suspend fun getRunningMatches(): Result<List<CsgoMatch>> {
         return try {
-            val response = api.getRunningMatches(TOKEN)
+            val response = api.getRunningMatches(
+                apiToken = TOKEN
+            )
             Result.success(response.map { it.toDomain() })
         } catch (e: Exception){
             Result.failure(e)
         }
     }
 
-    override suspend fun getUpcomingMatches(): Result<List<CsgoMatch>> {
+    override suspend fun getUpcomingMatches(
+        pageNumber: Int,
+        pageSize: Int
+    ): Result<List<CsgoMatch>> {
         return try {
-            val response = api.getUpcomingMatches(TOKEN)
+            val response = api.getUpcomingMatches(
+                pageNumber = pageNumber,
+                pageSize = pageSize,
+                apiToken = TOKEN
+            )
             Result.success(response.map { it.toDomain() })
         }
         catch (e: Exception){

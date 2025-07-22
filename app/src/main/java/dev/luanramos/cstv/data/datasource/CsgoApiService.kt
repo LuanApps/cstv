@@ -15,6 +15,8 @@ interface CsgoApiService {
 
     @GET("csgo/matches/upcoming")
     suspend fun getUpcomingMatches(
+        @Query("page[number]") pageNumber: Int,
+        @Query("page[size]") pageSize: Int,
         @Query("token") apiToken: String
     ): List<CsgoMatchDto>
 
