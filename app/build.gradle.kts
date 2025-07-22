@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -21,14 +23,21 @@ android {
     }
 
     buildTypes {
+        debug {
+            buildConfigField("String", "API_TOKEN", "\"${getApiToken()}\"")
+        }
         release {
-            isMinifyEnabled = false
+            buildConfigField("String", "API_TOKEN", "\"${getApiToken()}\"")
+
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
@@ -42,7 +51,14 @@ android {
 
     buildFeatures {
         compose = true
+        buildConfig = true
     }
+}
+
+fun getApiToken(): String {
+    val props = Properties()
+    props.load(project.rootProject.file("local.properties").reader())
+    return props.getProperty("API_TOKEN") ?: ""
 }
 
 dependencies {

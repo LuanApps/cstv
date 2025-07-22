@@ -5,5 +5,5 @@ data class CsgoTeam(
     val name: String,
     val slug: String?= null,
     val acronym: String?= null,
-    val img: String ?= null
+    val image: String ?= null
 )
