@@ -54,25 +54,10 @@ fun MatchCard(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 48.dp, bottom = 16.dp),
-                horizontalArrangement = Arrangement.spacedBy(24.dp, Alignment.CenterHorizontally),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                TeamPlaceholder(
-                    name = team1Name
-                )
-                Text(
-                    text = "vs",
-                    color = colors.outline,
-                    fontSize = 16.sp
-                )
-                TeamPlaceholder(
-                    name = team2Name
-                )
-            }
+            TeamVersusRow(
+                team1Name = team1Name,
+                team2Name = team2Name
+            )
 
             HorizontalDivider(
                 color = MaterialTheme.colorScheme.outlineVariant,
