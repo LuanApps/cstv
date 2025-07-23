@@ -32,7 +32,6 @@ class MainActivity : ComponentActivity() {
         setContent {
             CSTVTheme {
                 val navController = rememberNavController()
-
                 NavHost(
                     navController = navController,
                     startDestination = "splash"
