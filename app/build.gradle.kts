@@ -98,4 +98,6 @@ dependencies {
 
     /** Splash */
     implementation(libs.androidx.core.splash)
+
+    implementation(libs.coil.compose)
 }

@@ -28,6 +28,9 @@ androidx-hilt-navigation-compose = "1.2.0"
 # Splash
 core-splash = "1.0.1"
 
+# ImageLoader
+coil-compose = "2.7.0"
+
 [libraries]
 
 # Kotlin
@@ -63,6 +66,9 @@ hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", ve
 
 # Splash
 androidx-core-splash= { group = "androidx.core", name = "core-splashscreen", version.ref = "core-splash" }
+
+# ImageLoader
+coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil-compose" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
