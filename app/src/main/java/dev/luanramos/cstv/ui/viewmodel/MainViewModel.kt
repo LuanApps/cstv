@@ -16,6 +16,11 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
+data class MatchesUiState(
+    val matches: List<CsgoMatch> = emptyList(),
+    val isError: Boolean = false
+)
+
 @HiltViewModel
 class MainViewModel @Inject constructor(
     private val getRunningMatchesUseCase: GetRunningMatchesUseCase,
@@ -32,8 +37,8 @@ class MainViewModel @Inject constructor(
     private val _team2Players = MutableStateFlow<List<CsgoPlayer>>(listOf())
     val team2Players: StateFlow<List<CsgoPlayer>> = _team2Players
 
-    private val _matches = MutableStateFlow<List<CsgoMatch>>(emptyList())
-    val matches: StateFlow<List<CsgoMatch>> = _matches
+    private val _matchesUiState = MutableStateFlow(MatchesUiState())
+    val matchesUiState: StateFlow<MatchesUiState> = _matchesUiState
 
     private var currentPage = 1
     private var isLastPage = false
@@ -55,7 +60,10 @@ class MainViewModel @Inject constructor(
                 getUpcomingMatchesUseCase(1, 20).getOrElse { emptyList() }
             }
 
-            _matches.value = runningMatches + upcomingMatches
+            _matchesUiState.value = MatchesUiState(
+                matches = runningMatches + upcomingMatches,
+                isError = (runningMatches + upcomingMatches).isEmpty()
+            )
 
             if (upcomingMatches.size < 20) {
                 isLastPage = true
@@ -73,7 +81,12 @@ class MainViewModel @Inject constructor(
                 if (newMatches.isEmpty()) {
                     isLastPage = true
                 } else {
-                    _matches.update { it + newMatches }
+                    _matchesUiState.update { current ->
+                        current.copy(
+                            matches = current.matches + newMatches,
+                            isError = false
+                        )
+                    }
                     if (newMatches.size < 20) isLastPage = true
                 }
             }.onFailure {
@@ -83,7 +96,7 @@ class MainViewModel @Inject constructor(
     }
 
     private fun resetMatchesList(){
-        _matches.value = listOf()
+        _matchesUiState.value = MatchesUiState()
     }
 
     fun refreshMatches() {

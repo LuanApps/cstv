@@ -5,4 +5,5 @@
     <string name="label_today">Hoje</string>
     <string name="label_unknown">Unknown</string>
     <string name="label_back_navigation">Voltar</string>
+    <string name="label_error_fetch_data">Falha ao carregar as partidas</string>
 </resources>

@@ -43,7 +43,7 @@ fun MatchesScreen(
    viewModel: MainViewModel,
    onMatchClick: () -> Unit
 ) {
-    val matchesListState by viewModel.matches.collectAsState()
+    val matchesUiListState by viewModel.matchesUiState.collectAsState()
     val pullRefreshState = rememberPullToRefreshState()
 
     var isRefreshing by remember { mutableStateOf(false) }
@@ -51,8 +51,8 @@ fun MatchesScreen(
     val listState = rememberLazyListState()
     val isLoadingMore = remember { mutableStateOf(false) }
 
-    LaunchedEffect(matchesListState) {
-        if(matchesListState.isNotEmpty() && isRefreshing){
+    LaunchedEffect(matchesUiListState) {
+        if (matchesUiListState.matches.isNotEmpty() || matchesUiListState.isError) {
             isRefreshing = false
         }
     }
@@ -119,8 +119,22 @@ fun MatchesScreen(
                     modifier = Modifier.fillMaxSize(),
                     state = listState
                 ) {
-                    if(!isRefreshing) {
-                        items(matchesListState) { match ->
+                    if (matchesUiListState.isError) {
+                        item {
+                            Box(
+                                modifier = Modifier
+                                    .fillParentMaxSize(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = stringResource(R.string.label_error_fetch_data),
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                                )
+                            }
+                        }
+                    } else {
+                        items(matchesUiListState.matches) { match ->
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -135,7 +149,6 @@ fun MatchesScreen(
                             ) {
                                 MatchCard(csgoMatch = match)
                             }
-
                             Spacer(modifier = Modifier.height(16.dp))
                         }
                     }
