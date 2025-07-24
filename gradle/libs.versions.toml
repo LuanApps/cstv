@@ -29,7 +29,7 @@ androidx-hilt-navigation-compose = "1.2.0"
 core-splash = "1.0.1"
 
 # ImageLoader
-coil-compose = "2.7.0"
+coil-compose = "2.3.0"
 
 [libraries]
 
