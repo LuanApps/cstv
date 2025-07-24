@@ -23,13 +23,15 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun LeftPlayerCard(
+    modifier: Modifier = Modifier,
     nickname: String,
     realName: String,
-    modifier: Modifier = Modifier
+    image: String
 ) {
     PlayerCard(
         nickname = nickname,
         realName = realName,
+        image = image,
         imageOnLeft = false,
         modifier = modifier
     )
@@ -37,13 +39,15 @@ fun LeftPlayerCard(
 
 @Composable
 fun RightPlayerCard(
+    modifier: Modifier = Modifier,
     nickname: String,
     realName: String,
-    modifier: Modifier = Modifier
+    image: String
 ) {
     PlayerCard(
         nickname = nickname,
         realName = realName,
+        image = image,
         imageOnLeft = true,
         modifier = modifier
     )
@@ -51,10 +55,11 @@ fun RightPlayerCard(
 
 @Composable
 private fun PlayerCard(
+    modifier: Modifier = Modifier,
     nickname: String,
     realName: String,
-    imageOnLeft: Boolean,
-    modifier: Modifier = Modifier
+    image: String,
+    imageOnLeft: Boolean
 ) {
     val shape = if (imageOnLeft) {
         RoundedCornerShape(topStart = 16.dp, bottomStart = 16.dp)
@@ -63,7 +68,7 @@ private fun PlayerCard(
     }
 
     Box(
-        modifier = Modifier
+        modifier = modifier
         .height(54.dp)
     ) {
         Box(
@@ -83,6 +88,7 @@ private fun PlayerCard(
         ) {
             if (imageOnLeft) {
                 PlayerImage(
+                    image = image,
                     modifier = Modifier.padding(start = 12.dp)
                 )
             }
@@ -113,6 +119,7 @@ private fun PlayerCard(
 
             if (!imageOnLeft) {
                 PlayerImage(
+                    image = image,
                     modifier = Modifier.padding(end = 12.dp)
                 )
             }
@@ -125,7 +132,8 @@ private fun PlayerCard(
 fun LeftPlayerCardPreview(){
     LeftPlayerCard(
         nickname = "Player",
-        realName = "Fulano"
+        realName = "Fulano",
+        image = ""
     )
 }
 
@@ -134,6 +142,7 @@ fun LeftPlayerCardPreview(){
 fun RightPlayerCardPreview(){
     RightPlayerCard(
         nickname = "Player",
-        realName = "Fulano"
+        realName = "Fulano",
+        image = ""
     )
 }

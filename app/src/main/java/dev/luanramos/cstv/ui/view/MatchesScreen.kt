@@ -1,8 +1,11 @@
 package dev.luanramos.cstv.ui.view
 
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -37,7 +40,8 @@ import kotlinx.coroutines.flow.filter
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MatchesScreen(
-   viewModel: MainViewModel
+   viewModel: MainViewModel,
+   onMatchClick: () -> Unit
 ) {
     val matchesListState by viewModel.matches.collectAsState()
     val pullRefreshState = rememberPullToRefreshState()
@@ -66,7 +70,7 @@ fun MatchesScreen(
             .collect {
                 if (!isLoadingMore.value) {
                     isLoadingMore.value = true
-                    viewModel.loadMoreMatches()
+                    viewModel.getMoreMatches()
                     isLoadingMore.value = false
                 }
             }
@@ -85,7 +89,6 @@ fun MatchesScreen(
                 )
         ) {
             Spacer(modifier = Modifier.height(16.dp))
-
             Text(
                 text = stringResource(R.string.label_matches),
                 style = MaterialTheme.typography.titleLarge,
@@ -118,7 +121,21 @@ fun MatchesScreen(
                 ) {
                     if(!isRefreshing) {
                         items(matchesListState) { match ->
-                            MatchCard(csgoMatch = match)
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable {
+                                        viewModel.setSelectedMatch(match)
+                                        viewModel.getTeamPlayers(
+                                            team1Id = match.team1?.id,
+                                            team2Id = match.team2?.id
+                                        )
+                                        onMatchClick()
+                                    }
+                            ) {
+                                MatchCard(csgoMatch = match)
+                            }
+
                             Spacer(modifier = Modifier.height(16.dp))
                         }
                     }

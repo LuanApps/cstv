@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.luanramos.cstv.domain.model.CsgoMatch
+import dev.luanramos.cstv.domain.model.CsgoPlayer
 import dev.luanramos.cstv.domain.usecase.GetRunningMatchesUseCase
 import dev.luanramos.cstv.domain.usecase.GetTeamPlayersUseCase
 import dev.luanramos.cstv.domain.usecase.GetUpcomingMatchesUseCase
@@ -21,6 +22,15 @@ class MainViewModel @Inject constructor(
     private val getUpcomingMatchesUseCase: GetUpcomingMatchesUseCase,
     private val getTeamPlayersUseCase: GetTeamPlayersUseCase
 ): ViewModel() {
+
+    private val _selectedMatch = MutableStateFlow<CsgoMatch?>(null)
+    val selectedMatch: StateFlow<CsgoMatch?> = _selectedMatch
+
+    private val _team1Players = MutableStateFlow<List<CsgoPlayer>>(listOf())
+    val team1Players: StateFlow<List<CsgoPlayer>> = _team1Players
+
+    private val _team2Players = MutableStateFlow<List<CsgoPlayer>>(listOf())
+    val team2Players: StateFlow<List<CsgoPlayer>> = _team2Players
 
     private val _matches = MutableStateFlow<List<CsgoMatch>>(emptyList())
     val matches: StateFlow<List<CsgoMatch>> = _matches
@@ -53,7 +63,7 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    fun loadMoreMatches() {
+    fun getMoreMatches() {
         if (isLastPage) return
 
         currentPage += 1
@@ -81,5 +91,44 @@ class MainViewModel @Inject constructor(
             resetMatchesList()
             getInitialMatchesData()
         }
+    }
+
+    fun setSelectedMatch(csgoMatch: CsgoMatch){
+        _selectedMatch.value = csgoMatch
+    }
+
+    fun getTeamPlayers(
+        team1Id: Long?,
+        team2Id: Long?
+    ){
+        viewModelScope.launch {
+            resetAllTeamPlayers()
+            withContext(Dispatchers.IO){
+                team1Id?.let {  id ->
+                    val fetchedTeam1Players = getTeamPlayersUseCase(id)
+                    fetchedTeam1Players.onSuccess { players ->
+                        _team1Players.value = players
+                    }.onFailure {
+                        _team1Players.value = listOf()
+                    }
+                }
+            }
+
+            withContext(Dispatchers.IO){
+                team2Id?.let { id ->
+                    val fetchedTeam2Players = getTeamPlayersUseCase(id)
+                    fetchedTeam2Players.onSuccess { players ->
+                        _team2Players.value = players
+                    }.onFailure {
+                        _team2Players.value = listOf()
+                    }
+                }
+            }
+        }
+    }
+
+    private fun resetAllTeamPlayers(){
+        _team1Players.value = listOf()
+        _team2Players.value = listOf()
     }
 }

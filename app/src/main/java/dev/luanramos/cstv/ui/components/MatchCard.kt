@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -27,6 +28,7 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import dev.luanramos.cstv.R
 import dev.luanramos.cstv.domain.model.CsgoMatch
+import dev.luanramos.cstv.utils.buildLeagueAndSeriesString
 import dev.luanramos.cstv.utils.formatMatchDate
 
 @Composable
@@ -37,7 +39,7 @@ fun MatchCard(
     val context = LocalContext.current
     val colors = MaterialTheme.colorScheme
     val isLive = csgoMatch.status == "running"
-    val unknownString = stringResource(R.string.unknown_label)
+    val unknownString = stringResource(R.string.label_unknown)
 
     Box(
         modifier = modifier
@@ -45,7 +47,7 @@ fun MatchCard(
                 color = colors.surface,
                 shape = RoundedCornerShape(16.dp)
             )
-            .fillMaxWidth()
+            .fillMaxWidth(),
     ) {
         LabelMatchTime(
             text = if(isLive) stringResource(R.string.label_live) else csgoMatch.scheduledAt.formatMatchDate(context) ?: "Unknown",
@@ -57,13 +59,14 @@ fun MatchCard(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            Spacer(modifier = Modifier.padding(top = 48.dp))
             TeamVersusRow(
                 team1Name = csgoMatch.team1?.name ?: unknownString,
                 team2Name = csgoMatch.team2?.name ?: unknownString,
                 team1Image = csgoMatch.team1?.image,
                 team2Image = csgoMatch.team2?.image
             )
-
+            Spacer(modifier = Modifier.height(16.dp))
             HorizontalDivider(
                 color = MaterialTheme.colorScheme.outlineVariant,
                 thickness = 1.dp
@@ -109,17 +112,5 @@ fun MatchCard(
                 )
             }
         }
-    }
-}
-
-fun buildLeagueAndSeriesString(
-    leagueName: String,
-    seriesName: String,
-    seriesFullName: String
-): String {
-    return when {
-        seriesName.isNotEmpty() -> "$leagueName - $seriesName"
-        seriesFullName.isNotEmpty() -> "$leagueName - $seriesFullName"
-        else -> leagueName
     }
 }

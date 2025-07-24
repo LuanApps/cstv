@@ -7,6 +7,8 @@ data class CsgoPlayerDto(
     val id: Long,
     val name: String,
     val slug: String?= null,
+    @SerializedName("first_name")val firstName: String ?= null,
+    @SerializedName("last_name")val lastName: String ?= null,
     @SerializedName("image_url") val image: String?= null,
     @SerializedName("active" )val isActive: Boolean
 ){
@@ -14,6 +16,8 @@ data class CsgoPlayerDto(
         id = id,
         name = name,
         slug = slug,
+        firstName = firstName,
+        lastName = lastName,
         image = image,
         isActive = isActive
     )

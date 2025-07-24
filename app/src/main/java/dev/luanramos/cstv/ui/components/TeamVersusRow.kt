@@ -22,10 +22,9 @@ fun TeamVersusRow(
 ) {
     Row(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 48.dp, bottom = 16.dp),
+            .fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(0.dp, Alignment.CenterHorizontally),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         TeamPlaceHolder(
             modifier = Modifier
