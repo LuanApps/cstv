@@ -1,6 +1,5 @@
 package dev.luanramos.cstv.ui.viewmodel
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -13,6 +12,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
@@ -25,48 +25,54 @@ class MainViewModel @Inject constructor(
     private val _matches = MutableStateFlow<List<CsgoMatch>>(emptyList())
     val matches: StateFlow<List<CsgoMatch>> = _matches
 
+    private var currentPage = 1
+    private var isLastPage = false
+
     init {
         getInitialMatchesData()
     }
 
-    fun getRunningMatches(){
-        viewModelScope.launch(Dispatchers.IO) {
-            val result = getRunningMatchesUseCase()
-            result.onSuccess { matches ->
-                _matches.value = matches
-            }.onFailure { e ->
-                Log.e("MatchesViewModel", "Failed to fetch matches", e)
+    private fun getInitialMatchesData() {
+        currentPage = 1
+        isLastPage = false
+
+        viewModelScope.launch {
+            val runningMatches = withContext(Dispatchers.IO) {
+                getRunningMatchesUseCase().getOrElse { emptyList() }
             }
 
+            val upcomingMatches = withContext(Dispatchers.IO) {
+                getUpcomingMatchesUseCase(1, 20).getOrElse { emptyList() }
+            }
+
+            _matches.value = runningMatches + upcomingMatches
+
+            if (upcomingMatches.size < 20) {
+                isLastPage = true
+            }
         }
     }
 
-    fun getUpcomingMatches(
-        pageNumber: Int,
-        pageSize: Int
-    ){
-        viewModelScope.launch(Dispatchers.IO) {
-            val result = getUpcomingMatchesUseCase(
-                pageNumber = pageNumber,
-                pageSize = pageSize
-            )
+    fun loadMoreMatches() {
+        if (isLastPage) return
+
+        currentPage += 1
+        viewModelScope.launch {
+            val result = getUpcomingMatchesUseCase(currentPage, 20)
             result.onSuccess { newMatches ->
-                _matches.update { it + newMatches }
-            }.onFailure { e ->
-                Log.e("MatchesViewModel", "Failed to fetch matches", e)
+                if (newMatches.isEmpty()) {
+                    isLastPage = true
+                } else {
+                    _matches.update { it + newMatches }
+                    if (newMatches.size < 20) isLastPage = true
+                }
+            }.onFailure {
+                currentPage -= 1
             }
         }
     }
 
-    fun getInitialMatchesData(){
-        getRunningMatches()
-        getUpcomingMatches(
-            pageNumber = 1,
-            pageSize = 20
-        )
-    }
-
-    fun resetMatchesList(){
+    private fun resetMatchesList(){
         _matches.value = listOf()
     }
 

@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -21,6 +22,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -29,6 +31,8 @@ import androidx.compose.ui.unit.sp
 import dev.luanramos.cstv.R
 import dev.luanramos.cstv.ui.components.MatchCard
 import dev.luanramos.cstv.ui.viewmodel.MainViewModel
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -40,10 +44,32 @@ fun MatchesScreen(
 
     var isRefreshing by remember { mutableStateOf(false) }
 
+    val listState = rememberLazyListState()
+    val isLoadingMore = remember { mutableStateOf(false) }
+
     LaunchedEffect(matchesListState) {
         if(matchesListState.isNotEmpty() && isRefreshing){
             isRefreshing = false
         }
+    }
+
+    LaunchedEffect(listState) {
+        snapshotFlow {
+            val lastVisibleItemIndex = listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index
+            val totalItems = listState.layoutInfo.totalItemsCount
+            lastVisibleItemIndex to totalItems
+        }
+            .distinctUntilChanged()
+            .filter { (lastVisible, total) ->
+                lastVisible != null && lastVisible >= total - 1
+            }
+            .collect {
+                if (!isLoadingMore.value) {
+                    isLoadingMore.value = true
+                    viewModel.loadMoreMatches()
+                    isLoadingMore.value = false
+                }
+            }
     }
 
     Surface(
@@ -55,7 +81,8 @@ fun MatchesScreen(
                 .fillMaxSize()
                 .padding(
                     vertical = 16.dp,
-                    horizontal = 24.dp)
+                    horizontal = 24.dp
+                )
         ) {
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -86,7 +113,8 @@ fun MatchesScreen(
                 }
             ) {
                 LazyColumn(
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier.fillMaxSize(),
+                    state = listState
                 ) {
                     if(!isRefreshing) {
                         items(matchesListState) { match ->
