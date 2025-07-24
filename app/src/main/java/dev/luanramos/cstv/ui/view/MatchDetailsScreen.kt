@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -51,6 +53,7 @@ fun MatchDetailsScreen(
     val team1Players by viewModel.team1Players.collectAsState()
     val team2Players by viewModel.team2Players.collectAsState()
     val isLoadingPlayers by viewModel.isLoadingPlayers.collectAsState()
+    val scrollState = rememberScrollState()
 
     val unknownString = stringResource(R.string.label_unknown)
 
@@ -88,7 +91,9 @@ fun MatchDetailsScreen(
                     CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                 } else {
                     Column(
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                        modifier = Modifier
+                            .verticalScroll(scrollState),
+                        verticalArrangement = Arrangement.spacedBy(16.dp),
                     ) {
                         Spacer(modifier = Modifier.height(8.dp))
                         Row {
