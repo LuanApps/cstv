@@ -1,9 +1,9 @@
 <resources>
     <string name="app_name">CSTV</string>
-    <string name="label_matches">Partidas</string>
-    <string name="label_live">AGORA</string>
-    <string name="label_today">Hoje</string>
+    <string name="label_matches">Matches</string>
+    <string name="label_live">Live</string>
+    <string name="label_today">Today</string>
     <string name="label_unknown">Unknown</string>
-    <string name="label_back_navigation">Voltar</string>
-    <string name="label_error_fetch_data">Falha ao carregar as partidas</string>
+    <string name="label_back_navigation">Back</string>
+    <string name="label_error_fetch_data">Fail to load matches data</string>
 </resources>
