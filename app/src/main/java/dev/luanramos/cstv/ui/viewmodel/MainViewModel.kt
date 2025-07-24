@@ -11,6 +11,7 @@ import dev.luanramos.cstv.domain.usecase.GetUpcomingMatchesUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -25,11 +26,7 @@ class MainViewModel @Inject constructor(
     val matches: StateFlow<List<CsgoMatch>> = _matches
 
     init {
-        getRunningMatches()
-        getUpcomingMatches(
-            pageNumber = 1,
-            pageSize = 20
-        )
+        getInitialMatchesData()
     }
 
     fun getRunningMatches(){
@@ -54,9 +51,29 @@ class MainViewModel @Inject constructor(
                 pageSize = pageSize
             )
             result.onSuccess { newMatches ->
-                val updatedList = _matches.value + newMatches
-                _matches.value = updatedList
+                _matches.update { it + newMatches }
+            }.onFailure { e ->
+                Log.e("MatchesViewModel", "Failed to fetch matches", e)
             }
+        }
+    }
+
+    fun getInitialMatchesData(){
+        getRunningMatches()
+        getUpcomingMatches(
+            pageNumber = 1,
+            pageSize = 20
+        )
+    }
+
+    fun resetMatchesList(){
+        _matches.value = listOf()
+    }
+
+    fun refreshMatches() {
+        viewModelScope.launch {
+            resetMatchesList()
+            getInitialMatchesData()
         }
     }
 }
