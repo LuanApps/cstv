@@ -40,6 +40,9 @@ class MainViewModel @Inject constructor(
     private val _matchesUiState = MutableStateFlow(MatchesUiState())
     val matchesUiState: StateFlow<MatchesUiState> = _matchesUiState
 
+    private val _isLoadingPlayers = MutableStateFlow(false)
+    val isLoadingPlayers: StateFlow<Boolean> = _isLoadingPlayers
+
     private var currentPage = 1
     private var isLastPage = false
 
@@ -116,6 +119,8 @@ class MainViewModel @Inject constructor(
     ){
         viewModelScope.launch {
             resetAllTeamPlayers()
+            _isLoadingPlayers.value = true
+
             withContext(Dispatchers.IO){
                 team1Id?.let {  id ->
                     val fetchedTeam1Players = getTeamPlayersUseCase(id)
@@ -137,6 +142,7 @@ class MainViewModel @Inject constructor(
                     }
                 }
             }
+            _isLoadingPlayers.value = false
         }
     }
 
