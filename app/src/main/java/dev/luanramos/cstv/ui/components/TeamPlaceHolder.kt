@@ -15,16 +15,19 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 
 @Composable
 fun TeamPlaceHolder(
-    name: String,
     modifier: Modifier = Modifier,
+    name: String,
+    image: String ?= null,
     imageOnLeft: Boolean
 ) {
     val colors = MaterialTheme.colorScheme
@@ -40,10 +43,27 @@ fun TeamPlaceHolder(
     ) {
         Box(
             modifier = Modifier
-                .size(60.dp)
-                .clip(CircleShape)
-                .background(colors.outline)
-        )
+                .size(60.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            if (!image.isNullOrEmpty()) {
+                AsyncImage(
+                    model = image,
+                    contentDescription = "Team Logo",
+                    modifier = Modifier
+                        .size(60.dp),
+                    contentScale = ContentScale.Fit
+                )
+            }
+            else{
+                Box(
+                    modifier = Modifier
+                        .matchParentSize()
+                        .clip(CircleShape)
+                        .background(colors.outline)
+                )
+            }
+        }
         Spacer(modifier = Modifier.height(12.dp))
         Text(
             text = name,

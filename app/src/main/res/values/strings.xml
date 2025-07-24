@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">CSTV</string>
+    <string name="label_matches">Partidas</string>
+    <string name="label_live">AGORA</string>
+    <string name="label_today">Hoje</string>
+    <string name="unknown_label">Unknown</string>
 </resources>

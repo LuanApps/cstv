@@ -18,23 +18,26 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
+import dev.luanramos.cstv.R
+import dev.luanramos.cstv.domain.model.CsgoMatch
+import dev.luanramos.cstv.utils.formatMatchDate
 
 @Composable
 fun MatchCard(
     modifier: Modifier = Modifier,
-    team1Name: String = "Unknown ",
-    team2Name: String = "Unknown",
-    matchTime: String = "Unknown",
-    matchTimeBackgroundColor: Color = MaterialTheme.colorScheme.outlineVariant,
-    leagueAndSeries: String = "Unknown",
-    leagueLogo: String ?= null,
-
+    csgoMatch: CsgoMatch
 ) {
+    val context = LocalContext.current
     val colors = MaterialTheme.colorScheme
+    val isLive = csgoMatch.status == "running"
+    val unknownString = stringResource(R.string.unknown_label)
 
     Box(
         modifier = modifier
@@ -45,8 +48,8 @@ fun MatchCard(
             .fillMaxWidth()
     ) {
         LabelMatchTime(
-            text = matchTime,
-            backgroundColor = matchTimeBackgroundColor
+            text = if(isLive) stringResource(R.string.label_live) else csgoMatch.scheduledAt.formatMatchDate(context) ?: "Unknown",
+            backgroundColor = if(isLive) MaterialTheme.colorScheme.errorContainer else MaterialTheme.colorScheme.outlineVariant
         )
 
         Column(
@@ -55,8 +58,10 @@ fun MatchCard(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             TeamVersusRow(
-                team1Name = team1Name,
-                team2Name = team2Name
+                team1Name = csgoMatch.team1?.name ?: unknownString,
+                team2Name = csgoMatch.team2?.name ?: unknownString,
+                team1Image = csgoMatch.team1?.image,
+                team2Image = csgoMatch.team2?.image
             )
 
             HorizontalDivider(
@@ -73,11 +78,32 @@ fun MatchCard(
                 Box(
                     modifier = Modifier
                         .size(24.dp)
-                        .background(colors.outline, shape = CircleShape)
-                )
+                ){
+                    if (!csgoMatch.league.image.isNullOrEmpty()) {
+                        AsyncImage(
+                            model = csgoMatch.league.image,
+                            contentDescription = "League Logo",
+                            modifier = Modifier
+                                .size(60.dp),
+                            contentScale = ContentScale.Fit
+                        )
+                    }
+                    else{
+                        Box(
+                            modifier = Modifier
+                                .matchParentSize()
+                                .background(colors.outline, shape = CircleShape)
+                                .clip(CircleShape)
+                        )
+                    }
+                }
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = leagueAndSeries,
+                    text = buildLeagueAndSeriesString(
+                        leagueName = csgoMatch.league.name,
+                        seriesName = csgoMatch.serie.name,
+                        seriesFullName = csgoMatch.serie.fullName
+                    ),
                     color = colors.onSurfaceVariant,
                     fontSize = 12.sp
                 )
@@ -86,8 +112,14 @@ fun MatchCard(
     }
 }
 
-@Composable
-@Preview(showBackground = true)
-fun MatchCardPreview(){
-    MatchCard()
+fun buildLeagueAndSeriesString(
+    leagueName: String,
+    seriesName: String,
+    seriesFullName: String
+): String {
+    return when {
+        seriesName.isNotEmpty() -> "$leagueName - $seriesName"
+        seriesFullName.isNotEmpty() -> "$leagueName - $seriesFullName"
+        else -> leagueName
+    }
 }

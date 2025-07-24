@@ -10,7 +10,8 @@ data class CsgoMatchDto(
     @SerializedName("scheduled_at") val scheduledAt: Date,
     val league: CsgoLeagueDto,
     val serie: CsgoSerieDto,
-    val opponents: List<OpponentWrapperDto>
+    val opponents: List<OpponentWrapperDto>,
+    val status: String
 ) {
     fun toDomain(): CsgoMatch = CsgoMatch(
         id = id,
@@ -19,7 +20,8 @@ data class CsgoMatchDto(
         team2 = opponents.getOrNull(1)?.opponent?.toDomain(),
         scheduledAt = scheduledAt,
         league = league.toDomain(),
-        serie = serie.toDomain()
+        serie = serie.toDomain(),
+        status = status
     )
 }
 

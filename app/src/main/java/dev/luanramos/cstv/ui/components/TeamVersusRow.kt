@@ -17,6 +17,8 @@ import androidx.compose.ui.unit.sp
 fun TeamVersusRow(
     team1Name: String,
     team2Name: String,
+    team1Image: String ?= null,
+    team2Image: String ?= null
 ) {
     Row(
         modifier = Modifier
@@ -26,10 +28,11 @@ fun TeamVersusRow(
         verticalAlignment = Alignment.CenterVertically
     ) {
         TeamPlaceHolder(
+            modifier = Modifier
+                .padding(end = 24.dp),
             name = team1Name,
             imageOnLeft = false,
-            modifier = Modifier
-                .padding(end = 24.dp)
+            image = team1Image
         )
         Text(
             text = "vs",
@@ -37,10 +40,11 @@ fun TeamVersusRow(
             fontSize = 16.sp
         )
         TeamPlaceHolder(
+            modifier = Modifier
+                .padding(start = 24.dp),
             name = team2Name,
             imageOnLeft = true,
-            modifier = Modifier
-                .padding(start = 24.dp)
+            image = team2Image
         )
     }
 }

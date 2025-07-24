@@ -9,5 +9,6 @@ data class CsgoMatch(
     val team2: CsgoTeam?= null,
     val league: CsgoLeague,
     val serie: CsgoSerie,
-    val scheduledAt: Date
+    val scheduledAt: Date,
+    val status: String
 )
