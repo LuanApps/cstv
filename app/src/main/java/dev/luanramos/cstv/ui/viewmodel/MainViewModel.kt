@@ -1,14 +1,16 @@
 package dev.luanramos.cstv.ui.viewmodel
 
+import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dev.luanramos.cstv.di.IoDispatcher
 import dev.luanramos.cstv.domain.model.CsgoMatch
 import dev.luanramos.cstv.domain.model.CsgoPlayer
 import dev.luanramos.cstv.domain.usecase.GetRunningMatchesUseCase
 import dev.luanramos.cstv.domain.usecase.GetTeamPlayersUseCase
 import dev.luanramos.cstv.domain.usecase.GetUpcomingMatchesUseCase
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -25,7 +27,8 @@ data class MatchesUiState(
 class MainViewModel @Inject constructor(
     private val getRunningMatchesUseCase: GetRunningMatchesUseCase,
     private val getUpcomingMatchesUseCase: GetUpcomingMatchesUseCase,
-    private val getTeamPlayersUseCase: GetTeamPlayersUseCase
+    private val getTeamPlayersUseCase: GetTeamPlayersUseCase,
+    @IoDispatcher private val ioDispatcher: CoroutineDispatcher
 ): ViewModel() {
 
     private val _selectedMatch = MutableStateFlow<CsgoMatch?>(null)
@@ -43,8 +46,11 @@ class MainViewModel @Inject constructor(
     private val _isLoadingPlayers = MutableStateFlow(false)
     val isLoadingPlayers: StateFlow<Boolean> = _isLoadingPlayers
 
-    private var currentPage = 1
-    private var isLastPage = false
+    var currentPage = 1
+        private set
+
+    @VisibleForTesting
+    internal var isLastPage = false
 
     init {
         getInitialMatchesData()
@@ -55,11 +61,11 @@ class MainViewModel @Inject constructor(
         isLastPage = false
 
         viewModelScope.launch {
-            val runningMatches = withContext(Dispatchers.IO) {
+            val runningMatches = withContext(ioDispatcher) {
                 getRunningMatchesUseCase().getOrElse { emptyList() }
             }
 
-            val upcomingMatches = withContext(Dispatchers.IO) {
+            val upcomingMatches = withContext(ioDispatcher) {
                 getUpcomingMatchesUseCase(1, 20).getOrElse { emptyList() }
             }
 
@@ -121,7 +127,7 @@ class MainViewModel @Inject constructor(
             resetAllTeamPlayers()
             _isLoadingPlayers.value = true
 
-            withContext(Dispatchers.IO){
+            withContext(ioDispatcher){
                 team1Id?.let {  id ->
                     val fetchedTeam1Players = getTeamPlayersUseCase(id)
                     fetchedTeam1Players.onSuccess { players ->
@@ -132,7 +138,7 @@ class MainViewModel @Inject constructor(
                 }
             }
 
-            withContext(Dispatchers.IO){
+            withContext(ioDispatcher){
                 team2Id?.let { id ->
                     val fetchedTeam2Players = getTeamPlayersUseCase(id)
                     fetchedTeam2Players.onSuccess { players ->
