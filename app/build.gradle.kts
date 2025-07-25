@@ -77,6 +77,10 @@ dependencies {
 
     /** testing */
     testImplementation(libs.junit)
+    testImplementation(libs.mockk)
+    testImplementation(libs.core.testing)
+    testImplementation(libs.kotlin.coroutine.test)
+    androidTestImplementation(libs.mockk.android)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
@@ -100,4 +104,5 @@ dependencies {
     implementation(libs.androidx.core.splash)
 
     implementation(libs.coil.compose)
+    testImplementation(kotlin("test"))
 }

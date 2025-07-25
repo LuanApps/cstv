@@ -11,6 +11,9 @@ junit = "4.13.2"
 junitVersion = "1.2.1"
 espressoCore = "3.6.1"
 lifecycleRuntimeKtx = "2.9.2"
+mockK = "1.14.5"
+core-testing = "2.2.0"
+kotlin-courotines-test = "1.10.2"
 
 # Compose
 activity-compose = "1.10.1"
@@ -41,6 +44,10 @@ junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
 androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
+mockk = { group = "io.mockk", name = "mockk", version.ref = "mockK" }
+mockk-android = { group = "io.mockk", name = "mockk-android", version.ref = "mockK" }
+core-testing = {group = "androidx.arch.core", name = "core-testing", version.ref = "core-testing"}
+kotlin-coroutine-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlin-courotines-test" }
 
 # Compose
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activity-compose" }
