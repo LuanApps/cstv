@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -49,11 +50,13 @@ fun MatchesScreen(
     var isRefreshing by remember { mutableStateOf(false) }
 
     val listState = rememberLazyListState()
-    val isLoadingMore = remember { mutableStateOf(false) }
+    val isLoadingMoreMatches = remember { mutableStateOf(false) }
+    val isInitialLoading = remember { mutableStateOf(true) }
 
     LaunchedEffect(matchesUiListState) {
         if (matchesUiListState.matches.isNotEmpty() || matchesUiListState.isError) {
             isRefreshing = false
+            isInitialLoading.value = false
         }
     }
 
@@ -68,10 +71,10 @@ fun MatchesScreen(
                 lastVisible != null && lastVisible >= total - 1
             }
             .collect {
-                if (!isLoadingMore.value) {
-                    isLoadingMore.value = true
+                if (!isLoadingMoreMatches.value) {
+                    isLoadingMoreMatches.value = true
                     viewModel.getMoreMatches()
-                    isLoadingMore.value = false
+                    isLoadingMoreMatches.value = false
                 }
             }
     }
@@ -80,76 +83,86 @@ fun MatchesScreen(
         modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(
-                    vertical = 16.dp,
-                    horizontal = 24.dp
-                )
-        ) {
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(
-                text = stringResource(R.string.label_matches),
-                style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.onBackground,
-                fontSize = 28.sp
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            PullToRefreshBox(
-                isRefreshing = isRefreshing,
-                onRefresh = {
-                    isRefreshing = true
-                    viewModel.refreshMatches()
-                },
-                state = pullRefreshState,
-                indicator = {
-                    Indicator(
-                        modifier = Modifier.align(Alignment.Center),
-                        isRefreshing = isRefreshing,
-                        containerColor = MaterialTheme.colorScheme.primaryContainer,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer,
-                        state = pullRefreshState
-                    )
-                }
+        if(isInitialLoading.value){
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
             ) {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    state = listState
+                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+            }
+        }
+        else {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(
+                        vertical = 16.dp,
+                        horizontal = 24.dp
+                    )
+            ) {
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    text = stringResource(R.string.label_matches),
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.onBackground,
+                    fontSize = 28.sp
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                PullToRefreshBox(
+                    isRefreshing = isRefreshing,
+                    onRefresh = {
+                        isRefreshing = true
+                        viewModel.refreshMatches()
+                    },
+                    state = pullRefreshState,
+                    indicator = {
+                        Indicator(
+                            modifier = Modifier.align(Alignment.Center),
+                            isRefreshing = isRefreshing,
+                            containerColor = MaterialTheme.colorScheme.primaryContainer,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                            state = pullRefreshState
+                        )
+                    }
                 ) {
-                    if (matchesUiListState.isError) {
-                        item {
-                            Box(
-                                modifier = Modifier
-                                    .fillParentMaxSize(),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = stringResource(R.string.label_error_fetch_data),
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                                )
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        state = listState
+                    ) {
+                        if (matchesUiListState.isError) {
+                            item {
+                                Box(
+                                    modifier = Modifier
+                                        .fillParentMaxSize(),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        text = stringResource(R.string.label_error_fetch_data),
+                                        style = MaterialTheme.typography.bodyLarge,
+                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                                    )
+                                }
                             }
-                        }
-                    } else {
-                        items(matchesUiListState.matches) { match ->
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clickable {
-                                        viewModel.setSelectedMatch(match)
-                                        viewModel.getTeamPlayers(
-                                            team1Id = match.team1?.id,
-                                            team2Id = match.team2?.id
-                                        )
-                                        onMatchClick()
-                                    }
-                            ) {
-                                MatchCard(csgoMatch = match)
+                        } else {
+                            items(matchesUiListState.matches) { match ->
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clickable {
+                                            viewModel.setSelectedMatch(match)
+                                            viewModel.getTeamPlayers(
+                                                team1Id = match.team1?.id,
+                                                team2Id = match.team2?.id
+                                            )
+                                            onMatchClick()
+                                        }
+                                ) {
+                                    MatchCard(csgoMatch = match)
+                                }
+                                Spacer(modifier = Modifier.height(16.dp))
                             }
-                            Spacer(modifier = Modifier.height(16.dp))
                         }
                     }
                 }
