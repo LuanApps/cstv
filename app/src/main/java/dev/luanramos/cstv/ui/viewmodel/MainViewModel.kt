@@ -60,14 +60,9 @@ class MainViewModel @Inject constructor(
         currentPage = 1
         isLastPage = false
 
-        viewModelScope.launch {
-            val runningMatches = withContext(ioDispatcher) {
-                getRunningMatchesUseCase().getOrElse { emptyList() }
-            }
-
-            val upcomingMatches = withContext(ioDispatcher) {
-                getUpcomingMatchesUseCase(1, 20).getOrElse { emptyList() }
-            }
+        viewModelScope.launch(ioDispatcher) {
+            val runningMatches = getRunningMatchesUseCase().getOrElse { emptyList() }
+            val upcomingMatches = getUpcomingMatchesUseCase(1, 20).getOrElse { emptyList() }
 
             _matchesUiState.value = MatchesUiState(
                 matches = runningMatches + upcomingMatches,
@@ -123,29 +118,25 @@ class MainViewModel @Inject constructor(
         team1Id: Long?,
         team2Id: Long?
     ){
-        viewModelScope.launch {
+        viewModelScope.launch(ioDispatcher) {
             resetAllTeamPlayers()
             _isLoadingPlayers.value = true
 
-            withContext(ioDispatcher){
-                team1Id?.let {  id ->
-                    val fetchedTeam1Players = getTeamPlayersUseCase(id)
-                    fetchedTeam1Players.onSuccess { players ->
-                        _team1Players.value = players
-                    }.onFailure {
-                        _team1Players.value = listOf()
-                    }
+            team1Id?.let {  id ->
+                val fetchedTeam1Players = getTeamPlayersUseCase(id)
+                fetchedTeam1Players.onSuccess { players ->
+                    _team1Players.value = players
+                }.onFailure {
+                    _team1Players.value = listOf()
                 }
             }
 
-            withContext(ioDispatcher){
-                team2Id?.let { id ->
-                    val fetchedTeam2Players = getTeamPlayersUseCase(id)
-                    fetchedTeam2Players.onSuccess { players ->
-                        _team2Players.value = players
-                    }.onFailure {
-                        _team2Players.value = listOf()
-                    }
+            team2Id?.let { id ->
+                val fetchedTeam2Players = getTeamPlayersUseCase(id)
+                fetchedTeam2Players.onSuccess { players ->
+                    _team2Players.value = players
+                }.onFailure {
+                    _team2Players.value = listOf()
                 }
             }
             _isLoadingPlayers.value = false
